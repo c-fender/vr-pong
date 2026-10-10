@@ -52,11 +52,7 @@ body.in-vr #hud, body.in-vr #menu { display: none; }
 #score .you b { color: #9fd3ff; }
 #score .cpu b { color: #ff9a9a; }
 #turn { opacity: 0.85; font-size: 13px; }
-@media (max-width: 480px) {
-  #score { border-radius: 18px; padding: 6px 14px; }
-  #turn { order: 3; flex-basis: 100%; text-align: center; font-size: 12px; }
-  #balls { top: calc(env(safe-area-inset-top) + 74px); }
-}
+
 
 #balls {
   position: absolute;
@@ -203,4 +199,11 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   .card > button { padding: 10px; margin-top: 8px; }
   .row { margin: 6px 0; }
   #balls { top: calc(env(safe-area-inset-top) + 52px); }
+}
+
+/* Narrow phones (portrait): turn label drops under the score. */
+@media (max-width: 480px) {
+  #score { border-radius: 18px; padding: 6px 14px; }
+  #turn { order: 3; flex-basis: 100%; text-align: center; font-size: 12px; }
+  #balls { top: calc(env(safe-area-inset-top) + 86px); }
 }

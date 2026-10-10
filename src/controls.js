@@ -1,8 +1,11 @@
 // Phone/desktop controls: device orientation steers the view,
-// an upward swipe (touch or mouse) throws the ball.
+// an upward swipe (touch or mouse) throws the ball, and dragging the top
+// part of the screen looks around (works everywhere, gyro or not).
 import * as THREE from 'three';
+import { VIEW_PITCH } from './constants.js';
 
-const DEFAULT_PITCH = -0.2;
+const DEFAULT_PITCH = VIEW_PITCH;
+const LOOK_ZONE = 0.4; // top 40% of the screen is for looking, the rest for throwing
 const zee = new THREE.Vector3(0, 0, 1);
 const yAxis = new THREE.Vector3(0, 1, 0);
 const xAxis = new THREE.Vector3(1, 0, 0);
@@ -17,8 +20,12 @@ export function yawPitchOf(q) {
 }
 
 export class FlatControls {
-  constructor(camera, dom, { onThrow, canThrow, onDrag }) {
-    Object.assign(this, { camera, dom, onThrow, canThrow, onDrag });
+  constructor(camera, dom, { onThrow, canThrow, canLook, onDrag }) {
+    Object.assign(this, { camera, dom, onThrow, canThrow, canLook, onDrag });
+    this.dragLook = { yaw: 0, pitch: 0 };
+    this.lookDrag = null;
+    this.qDragYaw = new THREE.Quaternion();
+    this.qDragPitch = new THREE.Quaternion();
     this.gyroEnabled = false;
     this.orientation = null;
     this.needsRecenter = true;
@@ -36,7 +43,11 @@ export class FlatControls {
     dom.addEventListener('pointerup', (e) => this._up(e));
     dom.addEventListener('pointercancel', () => this._cancel());
     dom.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-    window.addEventListener('deviceorientation', (e) => { if (e.alpha != null) this.orientation = e; });
+    dom.addEventListener('contextmenu', (e) => e.preventDefault());
+    // Some Android browsers only fill in the absolute variant.
+    const onOrient = (e) => { if (e.alpha != null && e.beta != null) this.orientation = e; };
+    window.addEventListener('deviceorientation', onOrient);
+    window.addEventListener('deviceorientationabsolute', onOrient);
     window.addEventListener('keydown', (e) => this.keys.add(e.key));
     window.addEventListener('keyup', (e) => this.keys.delete(e.key));
   }
@@ -56,7 +67,13 @@ export class FlatControls {
 
   get gyroActive() { return this.gyroEnabled && this.orientation != null; }
 
-  recenter() { this.needsRecenter = true; this.look.yaw = 0; this.look.pitch = DEFAULT_PITCH; }
+  recenter() {
+    this.needsRecenter = true;
+    this.look.yaw = 0;
+    this.look.pitch = DEFAULT_PITCH;
+    this.dragLook.yaw = 0;
+    this.dragLook.pitch = 0;
+  }
 
   update(dt) {
     if (this.gyroActive) {
@@ -72,7 +89,11 @@ export class FlatControls {
         this.needsRecenter = false;
         this.camera.quaternion.copy(this.yawOffset).multiply(this.deviceQ).multiply(this.pitchOffset);
       }
-      this.target.copy(this.yawOffset).multiply(this.deviceQ).multiply(this.pitchOffset);
+      // Drag-to-look adds on top of the phone's own rotation.
+      this.qDragYaw.setFromAxisAngle(yAxis, this.dragLook.yaw);
+      this.qDragPitch.setFromAxisAngle(xAxis, this.dragLook.pitch);
+      this.target.copy(this.qDragYaw).multiply(this.yawOffset).multiply(this.deviceQ)
+        .multiply(this.pitchOffset).multiply(this.qDragPitch);
     } else {
       // Desktop: arrow keys, plus a subtle mouse parallax.
       const k = this.keys;
@@ -90,7 +111,13 @@ export class FlatControls {
   }
 
   _down(e) {
-    if (!this.canThrow()) return;
+    const lookZone = e.clientY < innerHeight * LOOK_ZONE || e.button === 2;
+    if (lookZone || !this.canThrow()) {
+      if (!this.canLook()) return;
+      this.dom.setPointerCapture?.(e.pointerId);
+      this.lookDrag = { id: e.pointerId, x: e.clientX, y: e.clientY };
+      return;
+    }
     this.dom.setPointerCapture?.(e.pointerId);
     const pt = { x: e.clientX, y: e.clientY, t: performance.now() };
     this.drag = { id: e.pointerId, start: pt, pts: [pt] };
@@ -100,6 +127,16 @@ export class FlatControls {
     if (e.pointerType === 'mouse') {
       this.mouse.x = (e.clientX / innerWidth) * 2 - 1;
       this.mouse.y = (e.clientY / innerHeight) * 2 - 1;
+    }
+    const L = this.lookDrag;
+    if (L && e.pointerId === L.id) {
+      const dyaw = ((e.clientX - L.x) / innerWidth) * 1.8;
+      const dpitch = ((e.clientY - L.y) / innerHeight) * 1.3;
+      L.x = e.clientX; L.y = e.clientY;
+      const t = this.gyroActive ? this.dragLook : this.look;
+      t.yaw = THREE.MathUtils.clamp(t.yaw + dyaw, -1.4, 1.4);
+      t.pitch = THREE.MathUtils.clamp(t.pitch + dpitch, this.gyroActive ? -0.9 : -1.1, this.gyroActive ? 0.9 : 0.5);
+      return;
     }
     const d = this.drag;
     if (!d || e.pointerId !== d.id) return;
@@ -112,6 +149,7 @@ export class FlatControls {
   }
 
   _up(e) {
+    if (this.lookDrag && e.pointerId === this.lookDrag.id) { this.lookDrag = null; return; }
     const d = this.drag;
     if (!d || e.pointerId !== d.id) return;
     this._cancel();
@@ -131,6 +169,7 @@ export class FlatControls {
 
   _cancel() {
     this.drag = null;
+    this.lookDrag = null;
     this.onDrag?.(0, 0);
   }
 }

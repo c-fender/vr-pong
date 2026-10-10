@@ -7,7 +7,7 @@ import { Game } from './game.js';
 import { FlatControls } from './controls.js';
 import { XRControls } from './xr.js';
 import { hostRoom, joinRoom, normalizeCode } from './net.js';
-import { PLAYER_Z, EYE_HEIGHT } from './constants.js';
+import { PLAYER_Z, EYE_HEIGHT, VIEW_PITCH } from './constants.js';
 
 const $ = (id) => document.getElementById(id);
 const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1;
@@ -39,7 +39,7 @@ rig.position.set(0, 0, PLAYER_Z);
 rig.add(camera);
 scene.add(rig);
 camera.position.set(0, EYE_HEIGHT, 0);
-camera.rotation.x = -0.2;
+camera.rotation.x = VIEW_PITCH;
 
 createEnvironment(renderer, scene, { lowPower: isMobile });
 scene.add(createTable());
@@ -64,7 +64,7 @@ const ui = {
     $('sRight').textContent = rightScore;
     $('turn').textContent = turn;
     $('balls').dataset.n = balls;
-    $('hint').textContent = hint;
+    $('hint').textContent = hint || $('hint').dataset.note || '';
   },
   gameOver(text) {
     if (text) setTimeout(() => showMenu(text, 'over'), 1200);
@@ -77,6 +77,7 @@ game.strength = prefs.strength ?? 1;
 const controls = new FlatControls(camera, renderer.domElement, {
   onThrow: (speed, side) => game.swipeThrow(speed, side),
   canThrow: () => game.canPlayerThrow() && !renderer.xr.isPresenting && $('menu').hidden,
+  canLook: () => !renderer.xr.isPresenting && $('menu').hidden,
   onDrag: (x, lift) => game.setHoldDrag(x, lift),
 });
 const xr = new XRControls(renderer, rig, {
@@ -208,9 +209,23 @@ function onNetClose() {
   else renderMenu();
 }
 
+let gyroChecked = false;
 async function prepareDevice() {
   sfx.init();
-  if (isMobile && !controls.gyroEnabled) await controls.enableGyro();
+  if (!isMobile || controls.gyroEnabled) return;
+  const granted = await controls.enableGyro();
+  if (gyroChecked) return;
+  gyroChecked = true;
+  // Tell the player if the phone isn't sending motion data, and how to look instead.
+  setTimeout(() => {
+    if (controls.gyroActive) return;
+    const why = !granted ? 'Motion access was declined.'
+      : !window.isSecureContext ? 'Motion look needs an https:// address.'
+      : inArtifact ? 'Motion look is blocked on this page.'
+      : 'This browser isn\'t sending motion data.';
+    ui.toast('Drag the top of the screen to look', 'dim');
+    $('hint').dataset.note = `${why} Drag the top of the screen to look around.`;
+  }, 2500);
 }
 
 document.querySelectorAll('#mode button').forEach((b) => b.addEventListener('click', () => {
@@ -328,8 +343,8 @@ $('btnVR').addEventListener('click', async () => {
 navigator.xr?.isSessionSupported('immersive-vr').then((ok) => { xrSupported = ok; renderMenu(); }).catch(() => {});
 
 $('hintText').textContent = isMobile
-  ? 'Swipe up to throw. The faster the swipe, the harder the throw. Move your phone to look around. Works upright or sideways.'
-  : 'Drag the mouse upward and release to throw. Faster means harder. Arrow keys look around.';
+  ? 'Swipe up from the bottom to throw. The faster the swipe, the harder the throw. Tilt and turn your phone to look around, or drag the top of the screen. Works upright or sideways.'
+  : 'Drag the mouse upward from the lower screen to throw. Faster means harder. Drag the top of the screen, right-drag, or use the arrow keys to look around.';
 if (isMobile && !window.isSecureContext) $('hintText').textContent += ' Motion look needs HTTPS.';
 
 $('btnRecenter').addEventListener('click', () => controls.recenter());
@@ -353,7 +368,7 @@ renderMenu();
 function onResize() {
   if (renderer.xr.isPresenting) return;
   camera.aspect = innerWidth / innerHeight;
-  camera.fov = camera.aspect < 1 ? 64 : 48;
+  camera.fov = camera.aspect < 1 ? 58 : 46;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 }

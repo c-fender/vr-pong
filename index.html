@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1a1410">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Rooftop Cup Pong</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+
+  <div id="hud">
+    <div id="score">
+      <span class="you"><span id="nLeft">You</span> <b id="sLeft">0</b></span>
+      <span id="turn"></span>
+      <span class="cpu"><b id="sRight">0</b> <span id="nRight">CPU</span></span>
+    </div>
+    <div id="balls" data-n="2"><i></i><i></i></div>
+    <div id="toast"></div>
+    <div id="hint"></div>
+    <div id="tools">
+      <button id="btnRecenter" title="Re-center view">◎</button>
+      <button id="btnSound" title="Sound">🔊</button>
+      <button id="btnMenu" title="Menu">☰</button>
+    </div>
+  </div>
+
+  <div id="menu">
+    <div class="card">
+      <h1 id="title">Rooftop Cup Pong</h1>
+      <p class="sub" id="sub">Golden hour. City skyline. Ten cups.</p>
+      <div id="mode" class="seg wide">
+        <button data-m="cpu">vs CPU</button>
+        <button data-m="pass">Pass &amp; Play</button>
+        <button data-m="online">Online</button>
+      </div>
+      <p id="modeNote" class="note"></p>
+      <div class="row" id="rowDifficulty">
+        <label>CPU</label>
+        <div id="difficulty" class="seg">
+          <button data-d="easy">Easy</button>
+          <button data-d="medium">Medium</button>
+          <button data-d="hard">Hard</button>
+        </div>
+      </div>
+      <div id="online" hidden>
+        <div id="onlineIdle" class="stack">
+          <button id="btnHost" class="secondary">Create a room</button>
+          <div class="join">
+            <input id="joinCode" placeholder="Room code" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Room code">
+            <button id="btnJoin" class="secondary">Join</button>
+          </div>
+        </div>
+        <div id="onlineHosting" class="stack" hidden>
+          <p class="label">Room code</p>
+          <p id="roomCode" class="code">-----</p>
+          <button id="btnCopy" class="secondary">Copy invite</button>
+        </div>
+        <p id="netStatus" class="status" aria-live="polite"></p>
+      </div>
+      <div class="row">
+        <label for="strength">Throw power</label>
+        <input id="strength" type="range" min="0.6" max="1.6" step="0.05" value="1">
+      </div>
+      <button id="btnPlay" class="primary">Play</button>
+      <button id="btnVR" class="vr" hidden>Play in VR</button>
+      <p id="hintText" class="hint"></p>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

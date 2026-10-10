@@ -10,7 +10,14 @@ GamePigeon-style cup pong on a golden-hour city rooftop. Runs in the browser on 
 | VR headset (Quest, etc.) | Your head | Hold the trigger or grip, swing, and let go. The ball takes your hand's speed. |
 | Desktop | Arrow keys / WASD | Drag the mouse upward and release |
 
-Rules: you play the CPU, with 2 balls per turn. Sink both and you get the balls back. Cups re-rack at 6, 3 and 1, and the first to clear the other side wins. **Throw power** in the menu adjusts swipe sensitivity.
+Phones play upright (portrait) by default and also work sideways (landscape).
+
+**Modes**
+- **vs CPU**: easy, medium or hard.
+- **Pass & Play**: two players on one phone. The view flies to the other end of the table each turn.
+- **Online**: one player taps *Create a room* and shares the 5-letter code (or the `?join=CODE` invite link). The other enters it. Uses WebRTC via the free PeerJS server; inside a claude.ai artifact it uses the artifact's live room instead.
+
+Rules: 2 balls per turn. Sink both and you get the balls back. Cups re-rack at 6, 3 and 1, and the first to clear the other side wins. **Throw power** in the menu adjusts swipe sensitivity.
 
 ## Run locally
 
@@ -28,7 +35,8 @@ Settings → Pages → Source: *Deploy from a branch* → `main` / root. Then op
 
 - `src/physics.js` – custom ball physics (table, floor, cup walls, rims, sinking). Pure JS.
 - `src/throw.js` – swipe → launch velocity (fixed arc, speed = power).
-- `src/game.js` – turns, balls back, re-racks, CPU opponent.
+- `src/game.js` – turns, balls back, re-racks, CPU opponent, multiplayer sides.
+- `src/net.js` – online play (PeerJS / artifact room / `?net=local` test channel) with acks and resends.
 - `src/controls.js` – gyro look + swipe input. `src/xr.js` – VR controllers.
 - `src/environment.js`, `src/table.js`, `src/textures.js` – procedural rooftop, table, cups.
 - `tests/physics.test.mjs` – `node tests/physics.test.mjs` checks physics and tuning.

@@ -97,7 +97,7 @@ function createCupMesh() {
 
 export function createCups(scene) {
   const cups = [];
-  for (const side of ['cpu', 'player']) {
+  for (const side of ['far', 'near']) {
     formationPositions(10, side).forEach((pos, i) => {
       const mesh = createCupMesh();
       scene.add(mesh);

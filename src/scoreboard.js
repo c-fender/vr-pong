@@ -2,8 +2,9 @@
 import * as THREE from 'three';
 import { TABLE } from './constants.js';
 
+// One board behind each end of the table, facing the player at the other end.
 export class Scoreboard {
-  constructor(scene) {
+  constructor(scene, viewer = 'near') {
     this.canvas = document.createElement('canvas');
     this.canvas.width = 1024; this.canvas.height = 384;
     this.ctx = this.canvas.getContext('2d');
@@ -14,12 +15,15 @@ export class Scoreboard {
       new THREE.MeshBasicMaterial({ map: this.tex, transparent: true, toneMapped: false }));
     this.mesh.position.set(0, 1.95, -TABLE.length / 2 - 0.9);
     this.mesh.rotation.x = 0.12;
-    scene.add(this.mesh);
+    const holder = new THREE.Group();
+    holder.add(this.mesh);
+    if (viewer === 'far') holder.rotation.y = Math.PI;
+    scene.add(holder);
     this.key = '';
   }
 
-  update({ you, cpu, line1, line2 }) {
-    const key = [you, cpu, line1, line2].join('|');
+  update({ leftName, leftScore, rightName, rightScore, line1, line2 }) {
+    const key = [leftName, leftScore, rightName, rightScore, line1, line2].join('|');
     if (key === this.key) return;
     this.key = key;
     const c = this.ctx;
@@ -29,12 +33,12 @@ export class Scoreboard {
     c.strokeStyle = 'rgba(255,180,90,0.7)'; c.lineWidth = 4; c.stroke();
     c.textAlign = 'center'; c.textBaseline = 'middle';
     c.font = 'bold 44px system-ui, sans-serif';
-    c.fillStyle = '#9fd3ff'; c.fillText('YOU', 230, 70);
-    c.fillStyle = '#ff9a9a'; c.fillText('CPU', 794, 70);
+    c.fillStyle = '#9fd3ff'; c.fillText(leftName.toUpperCase(), 230, 70);
+    c.fillStyle = '#ff9a9a'; c.fillText(rightName.toUpperCase(), 794, 70);
     c.font = 'bold 130px system-ui, sans-serif';
     c.fillStyle = '#fff';
-    c.fillText(String(you), 230, 170);
-    c.fillText(String(cpu), 794, 170);
+    c.fillText(String(leftScore), 230, 170);
+    c.fillText(String(rightScore), 794, 170);
     c.font = 'bold 60px system-ui, sans-serif';
     c.fillStyle = 'rgba(255,255,255,0.5)'; c.fillText('–', 512, 170);
     c.font = 'bold 46px system-ui, sans-serif';

@@ -21,9 +21,9 @@
 
   <div id="hud">
     <div id="score">
-      <span class="you">YOU <b id="sYou">0</b></span>
-      <span id="turn">Your turn</span>
-      <span class="cpu"><b id="sCpu">0</b> CPU</span>
+      <span class="you"><span id="nLeft">You</span> <b id="sLeft">0</b></span>
+      <span id="turn"></span>
+      <span class="cpu"><b id="sRight">0</b> <span id="nRight">CPU</span></span>
     </div>
     <div id="balls" data-n="2"><i></i><i></i></div>
     <div id="toast"></div>
@@ -38,14 +38,35 @@
   <div id="menu">
     <div class="card">
       <h1 id="title">Rooftop Cup Pong</h1>
-      <p class="sub">Golden hour. City skyline. Ten cups.</p>
-      <div class="row">
+      <p class="sub" id="sub">Golden hour. City skyline. Ten cups.</p>
+      <div id="mode" class="seg wide">
+        <button data-m="cpu">vs CPU</button>
+        <button data-m="pass">Pass &amp; Play</button>
+        <button data-m="online">Online</button>
+      </div>
+      <p id="modeNote" class="note"></p>
+      <div class="row" id="rowDifficulty">
         <label>CPU</label>
         <div id="difficulty" class="seg">
           <button data-d="easy">Easy</button>
           <button data-d="medium">Medium</button>
           <button data-d="hard">Hard</button>
         </div>
+      </div>
+      <div id="online" hidden>
+        <div id="onlineIdle" class="stack">
+          <button id="btnHost" class="secondary">Create a room</button>
+          <div class="join">
+            <input id="joinCode" placeholder="Room code" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Room code">
+            <button id="btnJoin" class="secondary">Join</button>
+          </div>
+        </div>
+        <div id="onlineHosting" class="stack" hidden>
+          <p class="label">Room code</p>
+          <p id="roomCode" class="code">-----</p>
+          <button id="btnCopy" class="secondary">Copy invite</button>
+        </div>
+        <p id="netStatus" class="status" aria-live="polite"></p>
       </div>
       <div class="row">
         <label for="strength">Throw power</label>

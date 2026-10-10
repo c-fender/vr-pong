@@ -3,12 +3,12 @@ import { TABLE, CUP } from './constants.js';
 const ROWS = { 10: [4, 3, 2, 1], 6: [3, 2, 1], 3: [2, 1], 1: [1] };
 export const RERACK_COUNTS = [6, 3, 1];
 
-// Triangle formation of n cups for a side ('cpu' at -z, 'player' at +z),
+// Triangle formation of n cups for a side ('far' at -z, 'near' at +z),
 // back row against the table edge, apex pointing at the center.
 export function formationPositions(n, side) {
   const rows = ROWS[n];
   const sp = CUP.topR * 2 + 0.003;
-  const dir = side === 'cpu' ? 1 : -1;
+  const dir = side === 'far' ? 1 : -1;
   const back = -dir * (TABLE.length / 2 - CUP.topR - 0.02);
   const out = [];
   rows.forEach((count, i) => {

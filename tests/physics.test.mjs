@@ -5,7 +5,7 @@ import { formationPositions } from '../src/rack.js';
 import { TABLE, CUP, PLAYER_Z, EYE_HEIGHT } from '../src/constants.js';
 import { swipeToVelocity } from '../src/throw.js';
 
-const cups = () => formationPositions(10, 'cpu').map((p, i) => ({ ...p, id: i, active: true }));
+const cups = () => formationPositions(10, 'far').map((p, i) => ({ ...p, id: i, active: true }));
 
 function shoot(p, v, cs) {
   const sim = new BallSim();
@@ -46,7 +46,7 @@ for (const [name, sigma] of Object.entries({ easy: 0.12, medium: 0.07, hard: 0.0
   let made = 0;
   const N = 400;
   for (let i = 0; i < N; i++) {
-    const cs = formationPositions(10, 'player').map((p) => ({ ...p, active: true }));
+    const cs = formationPositions(10, 'near').map((p) => ({ ...p, active: true }));
     const target = cs[Math.floor(Math.random() * cs.length)];
     const from = { x: 0, y: 1.3, z: -TABLE.length / 2 - 0.35 };
     const v = solveLaunch(from, { x: target.x, y: TABLE.height + CUP.height + 0.01, z: target.z }, 0.85);

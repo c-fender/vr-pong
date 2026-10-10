@@ -2,7 +2,7 @@
 // Sanity-checks the physics + throw tuning without a browser.
 import { BallSim, solveLaunch } from '../src/physics.js';
 import { formationPositions } from '../src/rack.js';
-import { TABLE, CUP, PLAYER_Z, EYE_HEIGHT } from '../src/constants.js';
+import { TABLE, CUP, PLAYER_Z, LAUNCH_HEIGHT } from '../src/constants.js';
 import { swipeToVelocity } from '../src/throw.js';
 
 const cups = () => formationPositions(10, 'far').map((p, i) => ({ ...p, id: i, active: true }));
@@ -18,7 +18,7 @@ let failures = 0;
 const check = (cond, msg) => { console.log(`${cond ? 'ok  ' : 'FAIL'} ${msg}`); if (!cond) failures++; };
 
 // 1. Swipe speed sweep from the player's hand position.
-const hand = { x: 0, y: EYE_HEIGHT - 0.19, z: PLAYER_Z - 0.42 };
+const hand = { x: 0, y: LAUNCH_HEIGHT, z: PLAYER_Z - 0.42 };
 const sweep = [];
 for (let s = 0.5; s <= 5.01; s += 0.1) {
   const sim = shoot(hand, swipeToVelocity(s, 0, 0, 1), cups());

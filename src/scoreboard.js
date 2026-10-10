@@ -13,7 +13,7 @@ export class Scoreboard {
     this.mesh = new THREE.Mesh(
       new THREE.PlaneGeometry(1.2, 0.45),
       new THREE.MeshBasicMaterial({ map: this.tex, transparent: true, toneMapped: false }));
-    this.mesh.position.set(0, 1.95, -TABLE.length / 2 - 0.9);
+    this.mesh.position.set(0, 1.6, -TABLE.length / 2 - 0.9);
     this.mesh.rotation.x = 0.12;
     const holder = new THREE.Group();
     holder.add(this.mesh);

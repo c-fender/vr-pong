@@ -8,17 +8,17 @@
 //   online:      host is near, guest is far; the other end is 'remote'
 import * as THREE from 'three';
 import { BallSim, solveLaunch } from './physics.js';
-import { TABLE, CUP, BALL_R, EYE_HEIGHT } from './constants.js';
+import { TABLE, CUP, BALL_R, LAUNCH_HEIGHT } from './constants.js';
 import { formationPositions, RERACK_COUNTS } from './rack.js';
 import { swipeToVelocity } from './throw.js';
 import { createBallMesh } from './table.js';
 import { yawPitchOf } from './controls.js';
 
 export const DIFFICULTY = { easy: 0.12, medium: 0.07, hard: 0.035 };
-const HOLD_OFFSET = new THREE.Vector3(0, -0.1, -0.45);
+const HOLD_OFFSET = new THREE.Vector3(0, -0.11, -0.42);
 // Swipe throws launch from a fixed point in front of the player (rotated by
 // view yaw only), so phone tilt never changes how far a given swipe goes.
-export const LAUNCH_OFFSET = { y: EYE_HEIGHT - 0.19, z: -0.42 };
+export const LAUNCH_OFFSET = { y: LAUNCH_HEIGHT, z: -0.42 };
 const MADE_LINES = ['Splash!', 'Nice shot!', 'Cup!', 'Money!', 'Drink up!'];
 const tmpQ = new THREE.Quaternion();
 const axis = new THREE.Vector3();
